@@ -1,9 +1,15 @@
 <template>
-  <com-content refresh title="上拉加载、下拉刷新">123</com-content>
+  <com-content refresh title="上拉加载、下拉刷新" @loadMore="loadMore">
+    123
+  </com-content>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
-import ComContent from '@/components/Content/index.vue';
+import ComContent, {
+  PullUpRefresherParam,
+} from '@/components/Content/index.vue';
+import { mockListPage } from '@/moack/list';
+import log from '@/utils/log';
 
 export default defineComponent({
   name: 'DemoRefresh',
@@ -11,7 +17,16 @@ export default defineComponent({
     ComContent,
   },
   setup() {
-    return {};
+    function loadMore(params: PullUpRefresherParam, done: Function) {
+      log.d(mockListPage(), 'page');
+      console.log(params);
+      setTimeout(() => {
+        done([]);
+      }, 1000);
+    }
+    return {
+      loadMore,
+    };
   },
 });
 </script>
