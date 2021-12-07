@@ -7,18 +7,17 @@ module.exports = {
   extends: [
     'plugin:vue/essential',
     'airbnb-base',
+    'plugin:prettier/recommended',
   ],
   parserOptions: {
     ecmaVersion: 13,
     parser: '@typescript-eslint/parser',
     sourceType: 'module',
   },
-  plugins: [
-    'vue',
-    '@typescript-eslint',
-  ],
+  plugins: ['vue', '@typescript-eslint', 'prettier'],
   rules: {
-      "import/no-unresolved": "off",
-      "import/extensions": "off"
+    'import/no-unresolved': 'off',
+    'import/extensions': 'off',
+    'no-console': 'off',
   },
 };

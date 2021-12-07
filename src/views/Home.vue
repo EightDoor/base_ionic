@@ -1,17 +1,53 @@
 <template>
-  <com-content title="测试">
-    首页内容
+  <com-content title="首页">
+    <ion-list>
+      <ion-item
+        @click="change(item)"
+        v-for="(item, index) in list"
+        :key="index"
+      >
+        <ion-label>{{ item.title }}</ion-label>
+      </ion-item>
+    </ion-list>
   </com-content>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { IonList, IonItem, IonLabel } from '@ionic/vue';
 import ComContent from '@/components/Content/index.vue';
 
+interface ListType {
+  title: string;
+  path: string;
+}
 export default defineComponent({
   name: 'ViewsHome',
   components: {
     ComContent,
+    IonList,
+    IonItem,
+    IonLabel,
+  },
+  setup() {
+    const router = useRouter();
+    const list = ref<ListType[]>([
+      {
+        title: '上拉加载、下拉刷新',
+        path: '/pll_up_refresh',
+      },
+    ]);
+
+    function change(val: ListType) {
+      router.push({
+        path: val.path,
+      });
+    }
+    return {
+      list,
+      change,
+    };
   },
 });
 </script>
