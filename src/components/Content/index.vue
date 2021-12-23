@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header v-if="title">
+    <ion-header :style="{ height: `${headerHeight}px` }" v-if="title">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button text="返回"></ion-back-button>
@@ -17,10 +17,18 @@
       >
         <ion-refresher-content></ion-refresher-content>
       </ion-refresher>
-      <template #fixed>
-        <slot name="fixed" />
-      </template>
-      <slot />
+      <div class="fixed_content">
+        <slot name="tabs" />
+      </div>
+      <div
+        :style="
+          tabsHeight > 0
+            ? { height: `calc(100vh - ${tabsHeight + headerHeight}px)` }
+            : {}
+        "
+      >
+        <slot />
+      </div>
       <ion-infinite-scroll
         v-if="refresh"
         @ionInfinite="loadData($event)"
@@ -83,9 +91,16 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    // tabs高度
+    tabsHeight: {
+      type: Number,
+      default: 0,
+    },
   },
   emits: ['loadMore'],
   setup(props, { emit }) {
+    // 顶部header高度
+    const headerHeight = 44;
     const page = ref(1);
     const size = ref(10);
     // 超时时间 默认5s
@@ -159,6 +174,7 @@ export default defineComponent({
       chevronDownCircleOutline,
       loadData,
       isDisabled,
+      headerHeight,
     };
   },
 });
