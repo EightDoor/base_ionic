@@ -1,22 +1,38 @@
 <template>
-  <com-content title="首页">
-    <ion-list>
-      <ion-item
-        @click="change(item)"
-        v-for="(item, index) in list"
-        :key="index"
-      >
-        <ion-label>{{ item.title }}</ion-label>
-      </ion-item>
-    </ion-list>
-  </com-content>
+  <ion-page>
+    <ion-tabs
+      @ionTabsWillChange="beforeTabChange"
+      @ionTabsDidChange="afterTabChange"
+    >
+      <ion-tab-bar slot="bottom">
+        <ion-tab-button tab="home" href="/home/index">
+          <ion-icon :icon="homeOutline"></ion-icon>
+          <ion-label>首页</ion-label>
+        </ion-tab-button>
+
+        <ion-tab-button tab="my" href="/home/my">
+          <ion-icon :icon="personCircle"></ion-icon>
+          <ion-label>我的</ion-label>
+        </ion-tab-button>
+      </ion-tab-bar>
+      <ion-router-outlet />
+    </ion-tabs>
+  </ion-page>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { IonList, IonItem, IonLabel } from '@ionic/vue';
-import ComContent from '@/components/Content/index.vue';
+import {
+  IonLabel,
+  IonPage,
+  IonIcon,
+  IonTabButton,
+  IonTabBar,
+  IonTabs,
+  IonRouterOutlet,
+} from '@ionic/vue';
+import { personCircle, homeOutline } from 'ionicons/icons';
 
 interface ListType {
   title: string;
@@ -25,10 +41,13 @@ interface ListType {
 export default defineComponent({
   name: 'ViewsHome',
   components: {
-    ComContent,
-    IonList,
-    IonItem,
     IonLabel,
+    IonPage,
+    IonIcon,
+    IonTabButton,
+    IonTabBar,
+    IonTabs,
+    IonRouterOutlet,
   },
   setup() {
     const router = useRouter();
@@ -44,9 +63,21 @@ export default defineComponent({
         path: val.path,
       });
     }
+
+    const beforeTabChange = () => {
+      // do something before tab change
+    };
+    const afterTabChange = () => {
+      // do something after tab change
+    };
     return {
       list,
       change,
+
+      homeOutline,
+      personCircle,
+      beforeTabChange,
+      afterTabChange,
     };
   },
 });

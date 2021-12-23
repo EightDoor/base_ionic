@@ -2,24 +2,27 @@
   <ion-page>
     <ion-header v-if="title">
       <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-back-button text="返回"></ion-back-button>
+        </ion-buttons>
         <ion-title>{{ title }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
-    <ion-content class="content_container">
+    <ion-content :fullscreen="true" class="content_container">
       <ion-refresher
         v-if="refresh"
         slot="fixed"
         @ionRefresh="doRefresh($event)"
       >
-        <ion-refresher-content>
-          <slot />
-        </ion-refresher-content>
+        <ion-refresher-content></ion-refresher-content>
       </ion-refresher>
-      <div v-else>
-        <slot />
-      </div>
+      <template #fixed>
+        <slot name="fixed" />
+      </template>
+      <slot />
       <ion-infinite-scroll
+        v-if="refresh"
         @ionInfinite="loadData($event)"
         threshold="100px"
         id="infinite-scroll"
@@ -46,6 +49,8 @@ import {
   IonRefresherContent,
   IonInfiniteScroll,
   IonInfiniteScrollContent,
+  IonButtons,
+  IonBackButton,
 } from '@ionic/vue';
 import { chevronDownCircleOutline } from 'ionicons/icons';
 
@@ -65,6 +70,8 @@ export default defineComponent({
     IonRefresherContent,
     IonInfiniteScroll,
     IonInfiniteScrollContent,
+    IonButtons,
+    IonBackButton,
   },
   props: {
     // 标题

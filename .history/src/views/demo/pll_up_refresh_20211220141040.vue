@@ -8,7 +8,7 @@ import { defineComponent } from 'vue';
 import ComContent, {
   PullUpRefresherParam,
 } from '@/components/Content/index.vue';
-import { mockListPage } from '@/mock/list';
+import { mockListPage } from '@/moack/list';
 import log from '@/utils/log';
 
 export default defineComponent({

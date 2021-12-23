@@ -1,9 +1,7 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import Home from '../views/Home.vue';
-import ViewHome from '@/views/home/index.vue';
-import ViewMy from '@/views/my/index.vue';
-import DemoRoutes from './modules/demo';
+import PllUpRefresh from '@/views/demo/pll_up_refresh.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -14,21 +12,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/home',
     name: 'Home',
     component: Home,
-    redirect: '/home/index',
-    children: [
-      {
-        path: 'index',
-        name: 'HomeIndex',
-        component: ViewHome,
-      },
-      {
-        path: 'my',
-        name: 'HomeMy',
-        component: ViewMy,
-      },
-    ],
   },
-  ...DemoRoutes,
+  {
+    path: '/pll_up_refresh',
+    name: 'pllUpRefresh',
+    component: PllUpRefresh,
+  },
 ];
 
 const router = createRouter({
