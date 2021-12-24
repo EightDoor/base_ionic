@@ -1,7 +1,7 @@
 <template>
-  <comm-content :title="title" :tabsHeight="tabsHeight">
+  <comm-content :title="title" is-tabs>
     <template #tabs>
-      <ion-segment @ionChange="segmentChanged($event)">
+      <ion-segment :value="selectSegment" @ionChange="segmentChanged($event)">
         <ion-segment-button
           v-for="(item, index) in data"
           :key="index"
@@ -14,13 +14,29 @@
     <template #default>
       <div class="swiper_container">
         <swiper
-          class="top_tabs"
           :modules="modules"
-          :pagination="true"
-          :scrollbar="true"
+          virtual
+          class="top_tabs_swiper"
+          @slideChange="slideChange"
+          @swiper="swiperInit"
         >
-          <swiper-slide v-for="(item, index) in data" :key="index">
-            <component :is="item.component" />
+          <swiper-slide
+            :virtualIndex="index"
+            v-for="(item, index) in data"
+            :key="index"
+          >
+            <content-container
+              :style="{
+                height: `calc(100vh - ${Config.height.tabsHeight}px - ${Config.height.headerHeight}px)`,
+                width: '100%',
+              }"
+              :isLoad="index === selectIndex"
+              refresh
+              @loadMore="loadMore($event, item.key)"
+              :currentTabSelect="currentTabSelect"
+            >
+              <component :is="item.component" />
+            </content-container>
           </swiper-slide>
         </swiper>
       </div>
@@ -28,18 +44,29 @@
   </comm-content>
 </template>
 <script lang="ts">
-import { defineComponent, markRaw, PropType, ref, watch } from 'vue';
+import { defineComponent, markRaw, nextTick, PropType, ref, watch } from 'vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
-import 'swiper/swiper.scss';
+import { IonIcon, IonSegmentButton, IonSegment } from '@ionic/vue';
+
+import 'swiper/css';
+import 'swiper/css/keyboard';
+import 'swiper/css/pagination';
+import 'swiper/css/scrollbar';
 import '@ionic/vue/css/ionic-swiper.css';
-import { IonIcon, IonSegmentButton, IonSegment, IonicSlides } from '@ionic/vue';
-import { Keyboard, Pagination, Scrollbar } from 'swiper';
-import CommContent from '@/components/Content/index.vue';
+
+import { Virtual } from 'swiper';
+import CommContent, {
+  PullUpRefresherParam,
+} from '@/components/Content/index.vue';
 import log from '@/utils/log';
+import Config from '@/config/index';
+
+import ContentContainer from '@/components/Content/content_container.vue';
 
 export interface TopTabsList {
   title: string;
   component: any;
+  key: string;
 }
 export default defineComponent({
   name: 'TopTabs',
@@ -50,6 +77,7 @@ export default defineComponent({
     IonIcon,
     IonSegment,
     IonSegmentButton,
+    ContentContainer,
   },
   props: {
     title: {
@@ -57,17 +85,26 @@ export default defineComponent({
       default: '',
     },
     list: Array as PropType<TopTabsList[]>,
+    selectIndex: {
+      type: Number,
+      default: 0,
+    },
   },
-  setup(props) {
-    // tabs高度
-    const tabsHeight = 35;
+  emits: ['loadMore'],
+  setup(props, { emit }) {
+    const slidesRef = ref<any>();
+    const selectSegment = ref('');
+    const contentContainerRef = ref<any[]>([]);
 
     const data = ref<TopTabsList[]>([]);
+    const currentTabSelect = ref(0);
 
     function segmentChanged(e: any) {
       const { value } = e.target;
       const index = data.value.findIndex((item) => item.title === value);
       log.d(index, 'index');
+      slidesRef.value.slideTo(index);
+      currentTabSelect.value = index;
     }
 
     watch(
@@ -75,6 +112,10 @@ export default defineComponent({
       (newVal) => {
         if (newVal) {
           data.value = markRaw(newVal);
+          selectSegment.value = data.value[props.selectIndex].title;
+          nextTick(() => {
+            log.d(contentContainerRef.value);
+          });
         }
       },
       {
@@ -82,23 +123,50 @@ export default defineComponent({
         immediate: true,
       },
     );
+
+    const swiperInit = (swiper: any) => {
+      slidesRef.value = swiper;
+    };
+
+    function slideChange(swiper: any) {
+      const index = swiper.activeIndex;
+      selectSegment.value = data.value[index].title;
+    }
+
+    function loadMore(
+      data: { params: PullUpRefresherParam; done: Function },
+      key: string,
+    ) {
+      emit('loadMore', data, key);
+    }
     return {
       data,
       segmentChanged,
-      modules: [Keyboard, Pagination, Scrollbar, IonicSlides],
-      tabsHeight,
+      slidesRef,
+
+      swiperInit,
+      selectSegment,
+      slideChange,
+      modules: [Virtual],
+      Config,
+
+      loadMore,
+      currentTabSelect,
     };
   },
 });
 </script>
 <style scoped lang="scss">
-.top_tabs {
-  height: 100%;
+.swiper {
+  --bullet-background: rgb(var(--ion-color-primary-rgb), 0.5);
+  --bullet-background-active: var(--ion-color-primary);
+  --scroll-bar-background: var(--ion-color-light);
+}
+.top_tabs_swiper {
   width: 100%;
   //border: 1px solid red;
 }
 .swiper_container {
   width: 100vw;
-  height: 100%;
 }
 </style>

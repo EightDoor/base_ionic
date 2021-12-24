@@ -17,11 +17,11 @@ export default defineComponent({
     ComContent,
   },
   setup() {
-    function loadMore(params: PullUpRefresherParam, done: Function) {
+    function loadMore(data: { params: PullUpRefresherParam; done: Function }) {
       log.d(mockListPage(), 'page');
-      console.log(params);
+      console.log(data.params);
       setTimeout(() => {
-        done([]);
+        data.done([]);
       }, 1000);
     }
     return {

@@ -1,6 +1,9 @@
 <template>
   <ion-page>
-    <ion-header :style="{ height: `${headerHeight}px` }" v-if="title">
+    <ion-header
+      :style="{ height: `${Config.height.headerHeight}px` }"
+      v-if="title"
+    >
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button text="返回"></ion-back-button>
@@ -8,59 +11,34 @@
         <ion-title>{{ title }}</ion-title>
       </ion-toolbar>
     </ion-header>
-
-    <ion-content :fullscreen="true" class="content_container">
-      <ion-refresher
-        v-if="refresh"
-        slot="fixed"
-        @ionRefresh="doRefresh($event)"
-      >
-        <ion-refresher-content></ion-refresher-content>
-      </ion-refresher>
-      <div class="fixed_content">
-        <slot name="tabs" />
-      </div>
-      <div
-        :style="
-          tabsHeight > 0
-            ? { height: `calc(100vh - ${tabsHeight + headerHeight}px)` }
-            : {}
-        "
-      >
-        <slot />
-      </div>
-      <ion-infinite-scroll
-        v-if="refresh"
-        @ionInfinite="loadData($event)"
-        threshold="100px"
-        id="infinite-scroll"
-        :disabled="isDisabled"
-      >
-        <ion-infinite-scroll-content
-          loading-spinner="bubbles"
-          loading-text="加载中..."
-        ></ion-infinite-scroll-content>
-      </ion-infinite-scroll>
-      <div v-if="isDisabled" class="noData">没有更多了</div>
-    </ion-content>
+    <div class="fixed_content">
+      <slot name="tabs" />
+    </div>
+    <slot v-if="isTabs" />
+    <content-container
+      v-else
+      :refresh="refresh"
+      :isTabs="isTabs"
+      @loadMore="loadMore"
+    >
+      <slot />
+    </content-container>
   </ion-page>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent } from 'vue';
 import {
   IonPage,
   IonHeader,
-  IonContent,
   IonToolbar,
   IonTitle,
-  IonRefresher,
-  IonRefresherContent,
-  IonInfiniteScroll,
-  IonInfiniteScrollContent,
   IonButtons,
   IonBackButton,
 } from '@ionic/vue';
 import { chevronDownCircleOutline } from 'ionicons/icons';
+
+import Config from '@/config/index';
+import ContentContainer from './content_container.vue';
 
 export interface PullUpRefresherParam {
   page: number;
@@ -71,15 +49,11 @@ export default defineComponent({
   components: {
     IonPage,
     IonHeader,
-    IonContent,
     IonToolbar,
     IonTitle,
-    IonRefresher,
-    IonRefresherContent,
-    IonInfiniteScroll,
-    IonInfiniteScrollContent,
     IonButtons,
     IonBackButton,
+    ContentContainer,
   },
   props: {
     // 标题
@@ -91,90 +65,21 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    // tabs高度
-    tabsHeight: {
-      type: Number,
-      default: 0,
+    isTabs: {
+      type: Boolean,
+      default: false,
     },
   },
   emits: ['loadMore'],
   setup(props, { emit }) {
-    // 顶部header高度
-    const headerHeight = 44;
-    const page = ref(1);
-    const size = ref(10);
-    // 超时时间 默认5s
-    const timeOut = 5000;
-    // 是否禁用加载更多
-    const isDisabled = ref(false);
-
-    // 是否刷新、加载完成
-    const whether = ref({
-      isRefresh: false,
-      isLoad: false,
-    });
-
-    function loadMore(status: 'load' | 'refresh'): Promise<1 | 2> {
-      return new Promise((resolve) => {
-        const params: PullUpRefresherParam = {
-          page: page.value,
-          size: size.value,
-        };
-        emit('loadMore', params, (val: any[]) => {
-          if (status === 'load') {
-            whether.value.isLoad = false;
-          } else if (status === 'refresh') {
-            whether.value.isRefresh = false;
-          }
-          resolve(1);
-          if (val.length < size.value) {
-            // 没有更多了
-            resolve(2);
-          }
-        });
-      });
+    function loadMore(params: PullUpRefresherParam, done: Function) {
+      emit('loadMore', params, done);
     }
-
-    // 加载更多
-    async function loadData(event: any) {
-      // 超时处理
-      setTimeout(() => {
-        if (!whether.value.isLoad) {
-          event.target.complete();
-        }
-      }, timeOut);
-      const result = await loadMore('load');
-      if (result === 2) {
-        // 没有更多了
-        event.target.disabled = true;
-        isDisabled.value = true;
-      }
-      event.target.complete();
-      whether.value.isLoad = true;
-    }
-
-    // 下拉刷新
-    async function doRefresh(event: any) {
-      page.value = 1;
-      // 超时处理
-      setTimeout(() => {
-        if (!whether.value.isRefresh) {
-          event.target.complete();
-        }
-      }, timeOut);
-      await loadMore('refresh');
-      // 关闭刷新
-      event.target.complete();
-      whether.value.isRefresh = true;
-      isDisabled.value = false;
-    }
-
     return {
-      doRefresh,
       chevronDownCircleOutline,
-      loadData,
-      isDisabled,
-      headerHeight,
+
+      Config,
+      loadMore,
     };
   },
 });
@@ -190,5 +95,13 @@ export default defineComponent({
 .noData {
   text-align: center;
   font-size: 20px;
+}
+.return_top {
+  position: fixed;
+  display: none;
+  bottom: 15px;
+  right: 15px;
+  width: 30px;
+  height: 30px;
 }
 </style>
