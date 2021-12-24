@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "npm run android": "ionic capacitor run android -l --external",
+    "npm run ios": "ionic capacitor run ios -l --external",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
