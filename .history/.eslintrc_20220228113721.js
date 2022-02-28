@@ -21,5 +21,9 @@ module.exports = {
     'no-console': 'off',
     'no-param-reassign': 'off',
     'import/prefer-default-export': 'off',
+    'vue/no-multiple-template-root': 'off',
+    'no-shadow': 'off',
+    'no-bitwise': 'off',
+    'import/no-extraneous-dependencies': 'off',
   },
 };

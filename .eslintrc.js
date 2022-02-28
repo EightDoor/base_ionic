@@ -24,5 +24,6 @@ module.exports = {
     'vue/no-multiple-template-root': 'off',
     'no-shadow': 'off',
     'no-bitwise': 'off',
+    'import/no-extraneous-dependencies': 'off',
   },
 };
